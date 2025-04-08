@@ -1,4 +1,5 @@
 import numpy as np
+from vector import Vector
 
 
 def runge_kutta_step(butcher_table, system_func, dynamic_params, system_params,
@@ -41,7 +42,7 @@ def runge_kutta_n_steps(table, system_func, initial_params,
 
     for _ in range(steps):
         current_params = runge_kutta_step(
-            table, system_func, initial_params, system_params, h)
+            table, system_func, current_params, system_params, h)
         history.append(current_params.copy())
 
-    return np.array(history)
+    return history
