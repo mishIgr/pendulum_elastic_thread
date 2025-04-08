@@ -1,52 +1,8 @@
 import numpy as np
 from vector import Vector
 import butcher_tables as tb
+from runge_kutta import runge_kutta_n_steps
 import visual as vsl
-
-
-def runge_kutta_step(butcher_table, system_func, dynamic_params, system_params,
-                     step):
-    """
-    Выполняет один шаг метода Рунге-Кутты.
-    """
-    A = butcher_table['A']
-    b = butcher_table['b']
-    c = butcher_table['c']
-    s = len(c)  # Количество стадий
-
-    k = np.zeros((s, len(dynamic_params)))
-
-    # Вычисляем коэффициенты k
-    for i in range(s):
-        sum_Ak = np.zeros_like(dynamic_params)
-        for j in range(i):
-            sum_Ak += A[i][j] * k[j]
-        k[i] = system_func(dynamic_params + step * sum_Ak, system_params)
-
-    # Вычисляем новое значение
-    sum_bk = np.zeros_like(dynamic_params)
-    for i in range(s):
-        sum_bk += b[i] * k[i]
-
-    new_dynamic_params = dynamic_params + step * sum_bk
-
-    return new_dynamic_params
-
-
-# def runge_kutta_n_steps(butcher_table, system_func, initial_params,
-#                         system_params, step, n_steps):
-#     """
-#     Выполняет n шагов метода Рунге-Кутты.
-#     """
-#     history = [initial_params.copy()]
-#     current_params = initial_params.copy()
-
-#     for _ in range(n_steps):
-#         current_params = runge_kutta_step(
-#             butcher_table, system_func, current_params, system_params, step)
-#         history.append(current_params.copy())
-
-#     return np.array(history)
 
 
 def pendulum_system_derivatives(state, system_params):
@@ -90,10 +46,10 @@ def pendulum_system_derivatives(state, system_params):
 
 
 state = Vector({
-    'x': 1.0,
-    'y': 0.0,
-    'vx': 0.0,
-    'vy': 0.0,
+    'x': 1.0,  # Начальная координата X
+    'y': 0.0,  # Начальная координата Y
+    'vx': 0.0,  # Начальная скорость по X
+    'vy': 0.0  # Начальная скорость по Y
 })
 
 params = Vector({
@@ -109,13 +65,8 @@ h = 0.01  # размер шага одной итерации
 steps = 1000  # количество шагов
 
 
-history = [state.copy()]
-current_params = state.copy()
-
-for _ in range(steps):
-    current_params = runge_kutta_step(
-        table, pendulum_system_derivatives, current_params, params, h)
-    history.append(current_params.copy())
-
+history = runge_kutta_n_steps(
+    table, pendulum_system_derivatives, state, params, h, steps
+)
 
 vsl.create_animation(history, h)
