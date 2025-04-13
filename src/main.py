@@ -23,7 +23,7 @@ def pendulum_system_derivatives(state, system_params):
     r = np.sqrt(x**2 + y**2)
 
     # Упругая сила (предотвращаем деление на ноль)
-    if r < 1e-6:  # Если нить почти нулевой длины
+    if r < l:  # Если нить почти нулевой длины
         elastic_x, elastic_y = 0.0, 0.0
     else:
         elastic_term = k * (1 - l / r)
@@ -46,21 +46,21 @@ def pendulum_system_derivatives(state, system_params):
 
 
 state = Vector({
-    'x': 3.0,  # Начальная координата X
-    'y': 0.0,  # Начальная координата Y
-    'vx': -5.0,  # Начальная скорость по X
-    'vy': 0.0  # Начальная скорость по Y
+    'x': 1.5,  # Начальная координата X
+    'y': -1,  # Начальная координата Y
+    'vx': 0.0,  # Начальная скорость по X
+    'vy': -0.4  # Начальная скорость по Y
 })
 
 params = Vector({
-    'm': 0.5,      # Масса маятника
+    'm': 0.1,      # Масса маятника
     'gamma': 0.1,  # Коэффициент вязкого трения
-    'k': 3.0,     # Жёсткость упругой нити
-    'l': 1.0,      # Естественная длина нити
+    'k': 4.0,     # Жёсткость упругой нити
+    'l': 3,      # Естественная длина нити
     'g': 9.81,     # Ускорение свободного падения
 })
 
-table = tb.rk4_table  # таблица бучера для рк
+table = tb.dopri5_table  # таблица бучера для рк
 h = 0.01  # размер шага одной итерации
 steps = 1000  # количество шагов
 
@@ -69,4 +69,4 @@ history = runge_kutta_n_steps(
     table, pendulum_system_derivatives, state, params, h, steps
 )
 
-vsl.create_animation(history, h)
+vsl.create_animation(history, h, params.l)
